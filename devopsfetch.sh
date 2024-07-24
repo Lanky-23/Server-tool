@@ -2,7 +2,6 @@
 
 # Script Name: devopsfetch.sh
 # Description: A DevOps tool for system information retrieval and monitoring
-# Author: [Your Name]
 
 # Path to the monitor script
 MONITOR_SCRIPT_PATH="/usr/local/bin/devopsfetch"
@@ -20,6 +19,7 @@ show_help() {
     echo "  --install-deps              Install necessary dependencies"
     echo "  --setup-service             Set up systemd service for continuous monitoring"
     echo "  --monitor                  Start continuous monitoring"
+    echo "  --setup-logrotate           Set up log rotation for log files"
 }
 
 # Function to display active ports and services
@@ -130,6 +130,25 @@ setup_logging() {
     sudo chown $USER:$USER /var/log/devopsfetch/devopsfetch.log
 }
 
+# Function to set up log rotation
+setup_log_rotation() {
+    echo "Setting up log rotation..."
+    sudo tee /etc/logrotate.d/devopsfetch <<EOF
+/var/log/devopsfetch/devopsfetch.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 640 root adm
+    postrotate
+        systemctl restart devopsfetch.service > /dev/null
+    endscript
+}
+EOF
+}
+
 # Function to monitor activities continuously
 monitor_activities() {
     logfile="/var/log/devopsfetch/devopsfetch.log"
@@ -163,6 +182,7 @@ while [[ "$1" != "" ]]; do
         --install-deps) install_dependencies; exit ;;
         --setup-service) setup_systemd_service; exit ;;
         --monitor) monitor_activities; exit ;;
+        --setup-logrotate) setup_log_rotation; exit ;;
         *) echo "Unknown option: $1"; show_help; exit 1 ;;
     esac
     shift
