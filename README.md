@@ -11,15 +11,23 @@ This is a Bash script designed for system information retrieval and monitoring i
 - Time-based Activities: Displays activities within a specified time range.
 - Service Management: Installs necessary dependencies, sets up systemd service for continuous monitoring.
 
-Installation
-Clone the repository:
+## Installation
+- Clone the repository:
 ```
 git clone <repo_url>
 cd <repository_directory>
 ```
-Make the script executable:
+- Make the script executable:
 ```
 chmod +x devopsfetch.sh
+```
+
+## Setup Script (setup_devopsfetch.sh)
+`setup_devopsfetch.sh` is a Bash script that automates the setup process for devopsfetch.sh. It installs necessary dependencies, copies the main script to appropriate locations, creates a systemd service for continuous monitoring, and sets up logging for monitoring activities.
+
+- Run the Setup Script:
+```
+./setup_devopsfetch.sh
 ```
 
 ## Dependencies
@@ -28,8 +36,7 @@ chmod +x devopsfetch.sh
 - `nginx`
 - `util-linux`
 
-## Setup Script (setup_devopsfetch.sh)
-`setup_devopsfetch.sh` is a Bash script that automates the setup process for devopsfetch.sh. It installs necessary dependencies, copies the main script to appropriate locations, creates a systemd service for continuous monitoring, and sets up logging for monitoring activities.
+
 
 
 
