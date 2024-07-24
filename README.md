@@ -1,21 +1,5 @@
 # DevOpsFetch Script and Setup Guide
-## Table of Contents
-### DevOpsFetch Script
-- Overview
-- Features
-- Usage
-- Command Line Options
-- Examples
-- Installation
-- Dependencies
-- Notes
-- License
-### Setup Script (setup_devopsfetch.sh)
-- Overview
-- Features
-- Usage
-- Notes
-- License
+
 ## DevOpsFetch Script 
 This is a Bash script designed for system information retrieval and monitoring in a DevOps environment. It provides various functionalities to gather and display information related to ports, Docker containers, Nginx configurations, user details, and more.
 
@@ -93,17 +77,8 @@ Start continuous monitoring:
 ./devopsfetch.sh --monitor
 ```
 
-Ensure these dependencies are installed before running the script.
 
-Notes
-Root Privileges: Some commands (sudo) in the script require root privileges. Ensure the script is executed with appropriate permissions.
-Continuous Monitoring: When using --monitor, logs are written to /var/log/devopsfetch/devopsfetch.log.
-License <a name="license-devopsfetch"></a>
-This project is licensed under the MIT License.
-
-
-### Features
-- Installation of Dependencies: Installs required packages (net-tools, docker.io, nginx, util-linux) via apt-get.
-- Copying Scripts: Copies devopsfetch.sh to /usr/local/bin/ and sets executable permissions.
-- Systemd Service Setup: Configures a systemd service (devopsfetch.service) that runs devopsfetch.sh --monitor continuously, ensuring it restarts on failure.
+## More Information
+- Root Privileges: Some commands (sudo) in the script require root privileges. Ensure the script is executed with appropriate permissions.
+- Continuous Monitoring: When using --monitor, logs are written to /var/log/devopsfetch/devopsfetch.log.
 - Logging Setup: Establishes a logging directory (/var/log/devopsfetch/) and a log file (devopsfetch.log) to store monitoring logs.
