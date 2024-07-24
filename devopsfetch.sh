@@ -14,7 +14,7 @@ show_help() {
     echo "  -d, --docker [container_name] List Docker images/containers or detailed info about a specific container"
     echo "  -n, --nginx [domain]        Display Nginx domains or detailed config for a specific domain"
     echo "  -u, --users [username]      List all users and last login times or info about a specific user"
-    echo "  -t, --time [time_range]     Display activities within a specified time range"
+    echo "  -t, --time [start_time] [end_time] Display activities within a specified time range"
     echo "  -h, --help                  Show this help message and exit"
     echo "  --install-deps              Install necessary dependencies"
     echo "  --setup-service             Set up systemd service for continuous monitoring"
@@ -65,12 +65,17 @@ display_nginx() {
     fi
 }
 
-# Function to list users and their last login times
+# Function to display users and their last login times
 display_users() {
     if [ -z "$1" ]; then
         echo -e "\nUsers and Last Login Times:"
         echo "---------------------------"
-        lastlog | awk '{printf "%-15s %-20s %-15s\n", $1, $2, $3}' | column -t
+        
+        # Get all users from /etc/passwd and filter out system accounts
+        # UID < 1000 is generally reserved for system accounts
+        awk -F: '$3 >= 1000 && $3 != 65534 {print $1}' /etc/passwd | while read -r user; do
+            lastlog -u "$user" | grep "$user" | awk '{printf "%-15s %-20s %-15s\n", $1, $2, $3}'
+        done | column -t
     else
         echo -e "\nLast Login Info for User $1:"
         echo "------------------------------"
@@ -78,15 +83,21 @@ display_users() {
     fi
 }
 
-# Function to display activities within a time range
+# Function to display activities within a specified time range
 display_time() {
-    if [ -z "$1" ]; then
-        echo "Time range not specified."
-    else
-        echo -e "\nActivities from Time Range: $1"
-        echo "------------------------------"
-        # Add specific logic to filter logs or activities based on time range
+    if [ "$#" -ne 2 ]; then
+        echo "Usage: $0 -t <start_time> <end_time>"
+        return
     fi
+
+    start_time="$1"
+    end_time="$2"
+
+    echo -e "\nActivities from Time Range: $start_time to $end_time"
+    echo "------------------------------"
+
+    # Use journalctl to fetch logs within the specified time range
+    journalctl --since "$start_time" --until "$end_time" --no-pager
 }
 
 # Function to install necessary dependencies
@@ -165,7 +176,7 @@ monitor_activities() {
         echo -e "\n=== User Info ===" >> $logfile
         $0 -u >> $logfile
         echo -e "\n=== Time-Based Activities ===" >> $logfile
-        $0 -t >> $logfile
+        $0 -t "2024-07-21 16:00:00" "2024-07-24 22:59:00" >> $logfile
         sleep 60  # Adjust the sleep duration as needed
     done
 }
@@ -173,11 +184,20 @@ monitor_activities() {
 # Parse command-line arguments
 while [[ "$1" != "" ]]; do
     case $1 in
-        -p|--port) shift; display_ports $1; exit ;;
-        -d|--docker) shift; display_docker $1; exit ;;
-        -n|--nginx) shift; display_nginx $1; exit ;;
-        -u|--users) shift; display_users $1; exit ;;
-        -t|--time) shift; display_time $1; exit ;;
+        -p|--port) shift; display_ports "$1"; exit ;;
+        -d|--docker) shift; display_docker "$1"; exit ;;
+        -n|--nginx) shift; display_nginx "$1"; exit ;;
+        -u|--users) shift; display_users "$1"; exit ;;
+        -t|--time) shift; 
+            if [ -n "$1" ] && [ -n "$2" ]; then
+                display_time "$1" "$2"
+                shift 2
+            else
+                echo "Error: Missing time range arguments."
+                show_help
+                exit 1
+            fi
+            exit ;;
         -h|--help) show_help; exit ;;
         --install-deps) install_dependencies; exit ;;
         --setup-service) setup_systemd_service; exit ;;
